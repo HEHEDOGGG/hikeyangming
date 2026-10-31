@@ -28,6 +28,48 @@
 .route-pinlabel{font-size:11px;color:#586b5e;padding:8px 18px 13px;border-top:1px solid var(--border)}
 @media(max-width:650px){.google-route-feature .feature-actions{flex-basis:auto;width:100%}.google-route-feature{flex-direction:column;align-items:stretch;padding:15px}.google-route-feature h2{font-size:17px}.google-route-feature .feature-action{flex-basis:auto;width:100%;min-height:52px}}
 @media(max-width:600px){.fab a.gmaps-sticky{background:#dbf4a5;color:#163d2a;font-weight:900;flex:1.5}}
+
+/* Mobile map stability update: native scroll first, map only on demand. */
+html,body{max-width:100%;overflow-x:clip}
+.mapgrid,.mapgrid>.panel,.maparea{min-width:0}
+.maparea{overflow:hidden;position:relative;height:auto;min-height:280px;background:#eef4ec}
+.maparea #leafletMap{display:none;width:100%;height:100%;min-height:0}
+.maparea.is-live{height:440px;min-height:0}
+.maparea.is-live #leafletMap{display:block}
+.maparea.is-live #routeFallback{display:none}
+.route-fallback{padding:17px 21px 12px;display:block;max-width:100%;background:linear-gradient(160deg,#f6faf5,#edf5e9)}
+.route-fallback-caption{display:flex;justify-content:space-between;gap:7px;align-items:center;font-size:12px;font-weight:900;color:#274f3b;margin:1px 0 15px}
+.route-fallback-caption span{font-size:10px;font-weight:700;color:#5f7b66}
+.route-fallback-list{position:relative;margin-left:10px}
+.route-fallback-list:before{content:"";position:absolute;left:14px;top:21px;bottom:25px;border-left:2px dashed #74ad86}
+.route-fallback-stop{position:relative;display:flex;align-items:flex-start;gap:12px;min-height:45px;font-size:12.5px;font-weight:800;line-height:1.5;color:#1b4934}
+.route-fallback-stop>span:last-child{padding-top:4px;flex:1;min-width:0}
+.route-fallback-stop small{display:block;font-size:10px;font-weight:500;color:#657e6b;margin-top:1px}
+.rf-dot{display:inline-flex;flex:0 0 30px;width:30px;height:30px;border-radius:50%;background:#315b48;border:2px solid white;box-shadow:0 1px 4px #315b4833;color:white;justify-content:center;align-items:center;font:800 12px/1 sans-serif;position:relative;z-index:1}
+.rf-dot.orange{background:#bd772b}
+.route-fallback.short .only-full{display:none}
+.route-fallback-foot{padding-top:10px;margin:5px 0 0;border-top:1px solid #d7e8d5;font-size:10px;color:#607766;line-height:1.7}
+.mapview-actions{border-top:1px solid var(--border);display:flex;gap:10px;padding:12px 16px;flex-wrap:wrap;background:#fff}
+.mapview-toggle{background:#e4f1e4;color:#24513a;border:1px solid #c4d9c8;border-radius:10px;padding:9px 15px;font-size:12px;font-weight:800}
+.mapview-toggle.secondary{background:#faf9f2;color:#68572e;border-color:#e7dfcb}
+.mapview-toggle[hidden]{display:none!important}
+/* Leaflet's pan gestures must not steal vertical scrolling on touchscreens. */
+@media(pointer:coarse){.maparea.is-live #leafletMap,.maparea.is-live .leaflet-container{touch-action:pan-y!important;overscroll-behavior:auto}}
+@media(pointer:coarse){.maparea.is-live.pan-enabled #leafletMap,.maparea.is-live.pan-enabled .leaflet-container{touch-action:none!important}}
+@media(max-width:850px){.maparea{height:auto;min-height:250px}.maparea.is-live{height:340px}.route-fallback{padding:14px 16px 12px}}
+@media(max-width:600px){.maparea{height:auto;min-height:250px}.maparea.is-live{height:330px}.route-fallback-caption{flex-wrap:wrap}}
+
+/* Google Maps: separate route preview from actionable current-position navigation. */
+.google-route-feature .feature-actions{flex-basis:290px;max-width:100%;min-width:0}
+.nav-launch-box{padding:12px;background:#ffffff16;border:1px solid #ffffff45;border-radius:13px;min-width:0}
+.nav-launch-box label{display:block;font-size:12px;font-weight:900;margin:0 0 7px}
+.nav-launch-box select{display:block;width:100%;max-width:100%;min-width:0;padding:10px 11px;border:1px solid #a5caaf;border-radius:9px;font-size:13px;font-weight:800;color:#183e31;background:#fff}
+.google-route-feature .feature-actions .nav-start{margin-top:9px;background:#d9f6a3;font-size:14px;min-height:55px}
+.google-route-feature .feature-actions .route-view{background:#ffffff12;border:1px solid #adc4b8;color:#fff;font-size:12px;min-height:44px;box-shadow:none}
+.nav-direct-note{font-size:10px;line-height:1.65;color:#d7e6d9;margin-top:9px}
+.maplinks #linkStartNavigation{flex-basis:100%;min-height:45px}
+@media(max-width:650px){.google-route-feature .feature-actions{flex-basis:auto;width:100%;max-width:100%}}
+@media(max-width:600px){.fab a{padding:9px 4px;font-size:10px;min-width:0;white-space:nowrap}.fab a.gmaps-sticky{flex:1.25}}
 </style>
 </head>
 <body>
@@ -36,19 +78,49 @@
 <section class="hero" aria-labelledby="heroHeading"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Green_landscape_of_Qingtiangang.jpg/1280px-Green_landscape_of_Qingtiangang.jpg" alt="擎天崗草原開闊山景" onerror="this.style.opacity='0'"><div class="herocontent"><div class="eyebrow">SATURDAY  ·  2026.10.31</div><h1 id="heroHeading">從絹絲瀑布，<br>走向石梯嶺。</h1><p>陽明山國際大旅館 → 絹絲瀑布 → 擎天崗 → 石梯嶺（最遠點）</p><div class="chips"><span class="chip"><span class="dualtime"><span class="dual dark">08:30 飯店停車集合</span><span class="dual light">09:00 飯店停車集合</span></span></span><span class="chip">18 人同行</span><span class="chip">隔天 5K 路跑</span><span class="chip">15:00 前回飯店（原目標）</span></div></div><div class="credit">封面：shih-chen yang / CC BY-SA 2.0</div></section>
 <div class="stats"><div class="stat"><span>集合日期與時間</span><strong>10/31 <span class="dualtime"><span class="dual dark">08:30</span><span class="dual light">09:00</span></span></strong><small>週六・飯店大廳 / 停車區</small></div><div class="stat"><span>完整版預估路程</span><strong>9–11 km</strong><small>分段估算，非實測 GPX</small></div><div class="stat"><span>完整版健行時間</span><strong>4.5–5.5 h</strong><small>含短休，依腳程浮動</small></div><div class="stat"><span>返回飯店目標</span><strong>15:00</strong><small>較晚集合的時間軸可能超時</small></div></div>
 <section class="google-route-feature" aria-label="Google Maps 分享路線">
-<div><div class="feature-kicker">GOOGLE MAPS · 你分享的路線</div><h2>飯店 → 絹絲瀑布 → 擎天崗 → 石梯嶺</h2><p>已改成直接開啟你提供的 Google Maps 分享連結，不再由網頁自行組合中途站或終點。</p><div class="feature-code">⛰ 健行最遠點：石梯嶺</div><div class="feature-small">開啟的是你指定的地圖連結；實際步道請以山徑標示及 GPS 軌跡為準。</div></div>
-<div class="feature-actions"><a id="primaryGoogleRoute" class="feature-action" href="https://maps.app.goo.gl/Am32ySRc1a9VXScJ6?g_st=il" target="_blank" rel="noopener noreferrer" aria-label="開啟 Google Maps 全程多點路線，終點5H6Q加62">🗺 開啟 Google Maps 分享路線 ↗</a></div>
+<div><div class="feature-kicker">GOOGLE MAPS · 你分享的路線</div><h2>飯店 → 絹絲瀑布 → 擎天崗 → 石梯嶺</h2><p>現在分成「從目前位置導航到下一站」與「查看你分享的完整路線」。分享連結本身只會開啟路線總覽。</p><div class="feature-code">⛰ 健行最遠點：石梯嶺</div><div class="feature-small">導航入口會嘗試直接啟動 Google Maps；若開啟路線預覽，請手動點「開始」。登山以現場步道標示為準。</div></div>
+<div class="feature-actions">
+  <div class="nav-launch-box">
+    <label for="navNextStop">直接導航｜選擇下一站</label>
+    <select id="navNextStop" aria-label="選擇下一個導航目的地">
+      <option value="entry">① 絹絲瀑布步道口（預設）</option>
+      <option value="fall">② 絹絲瀑布</option>
+      <option value="q">③ 擎天崗遊客服務站</option>
+      <option value="s">④ 石梯嶺（5H6Q+62）</option>
+      <option value="hotel">⑤ 返回陽明山國際大旅館</option>
+    </select>
+    <a class="feature-action nav-start" id="primaryStartNavigation" href="https://www.google.com/maps/dir/?api=1&destination=%E7%B5%B9%E7%B5%B2%E7%80%91%E5%B8%83%E6%AD%A5%E9%81%93%E5%8F%A3%2C+%E9%99%BD%E6%98%8E%E5%B1%B1%E5%9C%8B%E5%AE%B6%E5%85%AC%E5%9C%92%2C+%E8%87%BA%E5%8C%97%E5%B8%82&travelmode=walking&dir_action=navigate" target="_blank" rel="noopener noreferrer">🧭 嘗試立即開始步行導航 ↗</a>
+    <div class="nav-direct-note">從手機的<b>目前位置</b>導航到選定的一站；Google Maps 若無法直接開始，仍可能顯示預覽，需再按「開始」。山徑以步道指標為準。</div>
+  </div>
+  <a id="primaryGoogleRoute" class="feature-action route-view" href="https://maps.app.goo.gl/Am32ySRc1a9VXScJ6?g_st=il" target="_blank" rel="noopener noreferrer">🗺 查看你分享的完整路線 ↗</a>
+</div>
 </section>
 <div class="warnbar" role="alert"><strong>⚠ 出發許可尚待確認｜2026/10/27 查詢</strong>陽管處 10/24 公告：薔琵颱風後有倒木、落石與土壤含水量高等風險，呼籲暫緩入山。此頁為「待步道安全開放後才執行」的規劃，<b>並非確認 10/31 可以登山</b>。出發前務必向陽管處確認絹絲瀑布、擎天崗接石梯嶺均安全開放；未解除警示就取消山徑活動。<a target="_blank" rel="noopener" href="https://www.ymsnp.gov.tw/ch/titlelist/news/4633">官方公告 ↗</a></div>
 <section id="plan"><div class="sectiontop"><div><h2>01. 健行路線與分段</h2><p>健行路線只規劃到石梯嶺，不續走頂山；返程請沿原路回擎天崗搭 108，回程安排另見行程表。</p></div><div class="buttonswitch" role="group" aria-label="選擇健行版本"><button id="modeFull" class="selected" type="button" aria-pressed="true">到石梯嶺為止</button><button id="modeShort" type="button" aria-pressed="false">保守版 · 擎天崗</button></div></div>
 <div class="introgrid"><div class="panel"><div class="panelhead"><strong id="routeName">健行去程｜石梯嶺為最遠點</strong><span id="routeTag" class="tag">需評估體力與時間</span></div><div class="path" id="pathList"></div></div><aside class="panel sidepanel"><h3>出發資訊</h3><div class="detail"><b>停車 / 集合</b><span>陽明山國際大旅館<br>臺北市北投區湖山路一段 7 號</span></div><div class="detail"><b><span class="dualtime"><span class="dual dark">08:30</span><span class="dual light">09:00</span></span></b><span class="dualprose"><span class="dark">08:30 集合，08:40 出發</span><span class="light">09:00 集合，09:10 出發</span><span class="timehint">飯店門口點名、裝備檢查</span></span></div><div class="detail"><b>交通</b><span>去程徒步；回程在擎天崗搭「108 遊園公車」往陽明山總站（不是 108 區間車）</span></div><div class="detail"><b>聯繫</b><span>飯店 02-2861-7100（停車須先確認）<br>國家公園 02-2861-3601</span></div><div class="detail"><b>裝備</b><span>止滑鞋、雨具、外套、水 1–1.5 L、行動糧、悠遊卡</span></div><div class="callout" id="routeAdvice"><span class="dualprose"><span class="dark">11:15 擎天崗評估；12:20 石梯嶺折返（08:30 集合）</span><span class="light">11:45 擎天崗評估；12:50 石梯嶺折返（09:00 集合）</span></span></div></aside></div></section>
-<section id="maps"><div class="sectiontop"><div><h2>02. 前往石梯嶺的路線圖與 GPS</h2><p>本頁顯示健行景點順序，最遠點為石梯嶺；完整 Google Maps 路線請點首頁或下方按鈕開啟你分享的連結。山徑請以可信 GPX 與現場步道標示為準。</p></div></div><div class="mapgrid"><div class="panel"><div class="maptab"><strong>健行去程 · 石梯嶺為終點</strong><div class="buttonswitch"><button id="tabHike" class="selected" type="button" aria-pressed="true">去程路線</button><button id="tabGoogle" type="button" aria-label="在 Google Maps 開啟分享路線">Google Maps ↗</button></div></div><div class="maparea"><div style="display:block" id="leafletMap" role="img" aria-label="從飯店經絹絲瀑布與擎天崗到石梯嶺為止的健行去程示意地圖，可顯示 GPS 位置"></div></div><div class="mapnotice" id="mapNote">地圖只顯示飯店 → 絹絲瀑布 → 擎天崗 → 石梯嶺的去程。<b>綠色／橘色虛線僅是景點連接示意，並非正式山徑</b>；抵達石梯嶺後須原路返回擎天崗。</div><div class="routeline-legend"><span><i class="legend-line green"></i>飯店 → 擎天崗</span><span><i class="legend-line orange"></i>擎天崗 → 石梯嶺</span><span class="legend-warning">所有虛線均為示意</span></div><div class="maplinks"><a class="btn primary" id="linkHotel" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=%E9%99%BD%E6%98%8E%E5%B1%B1%E5%9C%8B%E9%9A%9B%E5%A4%A7%E6%97%85%E9%A4%A8">🏨 飯店位置</a><a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&origin=%E9%99%BD%E6%98%8E%E5%B1%B1%E5%9C%8B%E9%9A%9B%E5%A4%A7%E6%97%85%E9%A4%A8&destination=%E7%B5%B9%E7%B5%B2%E7%80%91%E5%B8%83%E6%AD%A5%E9%81%93%E5%8F%A3&travelmode=walking">🚶 飯店 → 步道入口</a><a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&origin=%E6%93%8E%E5%A4%A9%E5%B4%97&destination=%E9%99%BD%E6%98%8E%E5%B1%B1%E7%B8%BD%E7%AB%99&travelmode=transit">🚌 108 回程參考</a><a class="btn strong-map" id="linkMultiMap" href="https://maps.app.goo.gl/Am32ySRc1a9VXScJ6?g_st=il" rel="noopener noreferrer" target="_blank">🗺 開啟 Google Maps 分享路線 ↗</a><a class="btn" id="linkShortMap" href="https://www.google.com/maps/dir/?api=1&amp;origin=%E9%99%BD%E6%98%8E%E5%B1%B1%E5%9C%8B%E9%9A%9B%E5%A4%A7%E6%97%85%E9%A4%A8%2C+%E5%8F%B0%E5%8C%97%E5%B8%82%E5%8C%97%E6%8A%95%E5%8D%80%E6%B9%96%E5%B1%B1%E8%B7%AF%E4%B8%80%E6%AE%B57%E8%99%9F&amp;destination=%E6%93%8E%E5%A4%A9%E5%B4%97%E9%81%8A%E5%AE%A2%E6%9C%8D%E5%8B%99%E7%AB%99%2C+%E9%99%BD%E6%98%8E%E5%B1%B1%2C+%E5%8F%B0%E5%8C%97%E5%B8%82&amp;waypoints=%E7%B5%B9%E7%B5%B2%E7%80%91%E5%B8%83%E6%AD%A5%E9%81%93%E5%8F%A3%2C+%E9%99%BD%E6%98%8E%E5%B1%B1%2C+%E5%8F%B0%E5%8C%97%E5%B8%82%7C%E7%B5%B9%E7%B5%B2%E7%80%91%E5%B8%83%2C+%E9%99%BD%E6%98%8E%E5%B1%B1%2C+%E5%8F%B0%E5%8C%97%E5%B8%82&amp;travelmode=walking" rel="noopener noreferrer" target="_blank">🌿 保守版 Google 路線：到擎天崗</a></div></div><aside class="panel sidepanel"><div class="gpshead"><strong>即時位置</strong><span class="signal" id="gpsSignal">尚未啟用</span></div><div class="gpsbig" id="gpsMessage">尚未取得 GPS 位置</div><div class="muted">開啟手機定位權限後，本頁只在你的裝置顯示座標，不會上傳位置。</div><div class="gpsgrid"><div class="gpsdata"><span>距離絹絲瀑布（直線）</span><strong id="dFall">—</strong></div><div class="gpsdata"><span>距離擎天崗（直線）</span><strong id="dQ">—</strong></div><div class="gpsdata"><span>距離石梯嶺（直線）</span><strong id="dS">—</strong></div><div class="gpsdata"><span>GPS 精度</span><strong id="dAcc">—</strong></div></div><div class="btnrow"><button class="btn primary" id="btnGPS" type="button">◎ 啟用 GPS</button><button class="btn" id="btnFocus" type="button">⌖ 看我的位置</button><button class="btn" id="btnStopGPS" type="button">停止定位</button></div><p class="muted" id="gpsCoords">座標：尚未取得</p><div class="gpxbox"><strong style="font-size:13px">登山 GPX 軌跡</strong><p>地圖預設標示<b>完整行程順序與示意虛線</b>，這些連線不能作為實際登山導航。若取得可信 GPX，匯入後會以<b>實心橘線</b>疊加真實記錄軌跡。</p><input type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml" id="gpxInput" aria-label="上傳GPX軌跡"><div class="btnrow" style="margin-top:9px"><button class="btn" id="clearGPX" type="button">清除軌跡</button></div><p id="gpxInfo">目前尚未載入 GPX，虛線只供辨認方向。地圖及照片需要網路。</p></div></aside></div></section>
+<section id="maps"><div class="sectiontop"><div><h2>02. 前往石梯嶺的路線圖與 GPS</h2><p>本頁顯示健行景點順序，最遠點為石梯嶺；完整 Google Maps 路線請點首頁或下方按鈕開啟你分享的連結。山徑請以可信 GPX 與現場步道標示為準。</p></div></div><div class="mapgrid"><div class="panel"><div class="maptab"><strong>健行去程 · 石梯嶺為終點</strong><div class="buttonswitch"><button id="tabHike" class="selected" type="button" aria-pressed="true">去程路線</button><button id="tabGoogle" type="button" aria-label="在 Google Maps 開啟分享路線">Google Maps ↗</button></div></div><div class="maparea" id="routeMapArea">
+<div id="routeFallback" class="route-fallback" role="region" aria-label="手機版去程路線總覽（非實際山徑）">
+  <div class="route-fallback-caption">手機友善路線總覽 <span>不會攔截上下滑動</span></div>
+  <div class="route-fallback-list">
+    <div class="route-fallback-stop first"><span class="rf-dot">1</span><span>陽明山國際大旅館<small>停車／08:30 或 09:00 集合</small></span></div>
+    <div class="route-fallback-stop"><span class="rf-dot">2</span><span>環七星山人車分道<small>往絹絲瀑布步道口方向</small></span></div>
+    <div class="route-fallback-stop"><span class="rf-dot">3</span><span>絹絲瀑布步道口</span></div>
+    <div class="route-fallback-stop"><span class="rf-dot">4</span><span>絹絲瀑布</span></div>
+    <div class="route-fallback-stop"><span class="rf-dot">5</span><span>擎天崗草原<small>保守版在此結束</small></span></div>
+    <div class="route-fallback-stop only-full"><span class="rf-dot orange">6</span><span>日人路／金包里大路城門</span></div>
+    <div class="route-fallback-stop only-full final"><span class="rf-dot orange">7</span><span>石梯嶺<small>最遠點，原路返回擎天崗搭車</small></span></div>
+  </div>
+  <p class="route-fallback-foot">這是景點順序，不是可照線行走的 GPX。請點 Google Maps 開啟分享路線，登山仍以步道指標為準。</p>
+</div>
+<div id="leafletMap" role="img" aria-label="從飯店到石梯嶺的健行去程示意地圖；可顯示 GPS 位置"></div>
+</div>
+<div class="mapview-actions"><button type="button" id="toggleInteractive" class="mapview-toggle" aria-expanded="false">查看可縮放的互動底圖</button><button type="button" id="togglePan" class="mapview-toggle secondary" hidden>啟用拖動地圖</button></div><div class="mapnotice" id="mapNote">地圖只顯示飯店 → 絹絲瀑布 → 擎天崗 → 石梯嶺的去程。<b>綠色／橘色虛線僅是景點連接示意，並非正式山徑</b>；抵達石梯嶺後須原路返回擎天崗。</div><div class="routeline-legend"><span><i class="legend-line green"></i>飯店 → 擎天崗</span><span><i class="legend-line orange"></i>擎天崗 → 石梯嶺</span><span class="legend-warning">所有虛線均為示意</span></div><div class="maplinks"><a class="btn primary" id="linkHotel" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=%E9%99%BD%E6%98%8E%E5%B1%B1%E5%9C%8B%E9%9A%9B%E5%A4%A7%E6%97%85%E9%A4%A8">🏨 飯店位置</a><a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&origin=%E9%99%BD%E6%98%8E%E5%B1%B1%E5%9C%8B%E9%9A%9B%E5%A4%A7%E6%97%85%E9%A4%A8&destination=%E7%B5%B9%E7%B5%B2%E7%80%91%E5%B8%83%E6%AD%A5%E9%81%93%E5%8F%A3&travelmode=walking">🚶 飯店 → 步道入口</a><a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&origin=%E6%93%8E%E5%A4%A9%E5%B4%97&destination=%E9%99%BD%E6%98%8E%E5%B1%B1%E7%B8%BD%E7%AB%99&travelmode=transit">🚌 108 回程參考</a><a class="btn primary" id="linkStartNavigation" href="https://www.google.com/maps/dir/?api=1&destination=%E7%B5%B9%E7%B5%B2%E7%80%91%E5%B8%83%E6%AD%A5%E9%81%93%E5%8F%A3%2C+%E9%99%BD%E6%98%8E%E5%B1%B1%E5%9C%8B%E5%AE%B6%E5%85%AC%E5%9C%92%2C+%E8%87%BA%E5%8C%97%E5%B8%82&travelmode=walking&dir_action=navigate" rel="noopener noreferrer" target="_blank">🧭 導航到選擇的下一站 ↗</a><a class="btn strong-map" id="linkMultiMap" href="https://maps.app.goo.gl/Am32ySRc1a9VXScJ6?g_st=il" rel="noopener noreferrer" target="_blank">🗺 查看 Google Maps 完整分享路線 ↗</a><a class="btn" id="linkShortMap" href="https://www.google.com/maps/dir/?api=1&amp;origin=%E9%99%BD%E6%98%8E%E5%B1%B1%E5%9C%8B%E9%9A%9B%E5%A4%A7%E6%97%85%E9%A4%A8%2C+%E5%8F%B0%E5%8C%97%E5%B8%82%E5%8C%97%E6%8A%95%E5%8D%80%E6%B9%96%E5%B1%B1%E8%B7%AF%E4%B8%80%E6%AE%B57%E8%99%9F&amp;destination=%E6%93%8E%E5%A4%A9%E5%B4%97%E9%81%8A%E5%AE%A2%E6%9C%8D%E5%8B%99%E7%AB%99%2C+%E9%99%BD%E6%98%8E%E5%B1%B1%2C+%E5%8F%B0%E5%8C%97%E5%B8%82&amp;waypoints=%E7%B5%B9%E7%B5%B2%E7%80%91%E5%B8%83%E6%AD%A5%E9%81%93%E5%8F%A3%2C+%E9%99%BD%E6%98%8E%E5%B1%B1%2C+%E5%8F%B0%E5%8C%97%E5%B8%82%7C%E7%B5%B9%E7%B5%B2%E7%80%91%E5%B8%83%2C+%E9%99%BD%E6%98%8E%E5%B1%B1%2C+%E5%8F%B0%E5%8C%97%E5%B8%82&amp;travelmode=walking" rel="noopener noreferrer" target="_blank">🌿 保守版 Google 路線：到擎天崗</a></div></div><aside class="panel sidepanel"><div class="gpshead"><strong>即時位置</strong><span class="signal" id="gpsSignal">尚未啟用</span></div><div class="gpsbig" id="gpsMessage">尚未取得 GPS 位置</div><div class="muted">開啟手機定位權限後，本頁只在你的裝置顯示座標，不會上傳位置。</div><div class="gpsgrid"><div class="gpsdata"><span>距離絹絲瀑布（直線）</span><strong id="dFall">—</strong></div><div class="gpsdata"><span>距離擎天崗（直線）</span><strong id="dQ">—</strong></div><div class="gpsdata"><span>距離石梯嶺（直線）</span><strong id="dS">—</strong></div><div class="gpsdata"><span>GPS 精度</span><strong id="dAcc">—</strong></div></div><div class="btnrow"><button class="btn primary" id="btnGPS" type="button">◎ 啟用 GPS</button><button class="btn" id="btnFocus" type="button">⌖ 看我的位置</button><button class="btn" id="btnStopGPS" type="button">停止定位</button></div><p class="muted" id="gpsCoords">座標：尚未取得</p><div class="gpxbox"><strong style="font-size:13px">登山 GPX 軌跡</strong><p>地圖預設標示<b>完整行程順序與示意虛線</b>，這些連線不能作為實際登山導航。若取得可信 GPX，匯入後會以<b>實心橘線</b>疊加真實記錄軌跡。</p><input type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml" id="gpxInput" aria-label="上傳GPX軌跡"><div class="btnrow" style="margin-top:9px"><button class="btn" id="clearGPX" type="button">清除軌跡</button></div><p id="gpxInfo">目前尚未載入 GPX，虛線只供辨認方向。地圖及照片需要網路。</p></div></aside></div></section>
 <section id="timeline"><div class="sectiontop"><div><h2>03. 時間表與隊伍進度</h2><p><span class="timehint"><span class="dark">深色＝08:30 集合</span>　<span class="light">淺色＝09:00 集合</span></span>。下方可勾選已完成節點；本機記錄進度。</p></div><button class="btn" id="resetProgress" type="button">↺ 重設進度</button></div><div class="panel"><div class="progresslabel"><span id="progressText">0 / 0 站完成</span><span id="routeTiming">完整版（偏積極腳程）</span></div><div class="progressbar"><span id="progressBar"></span></div><div class="timeline" id="timeItems"></div><div class="timelinefoot" id="timelineNote">時間是希望達成的規劃目標，非實測，依天候、18 人步速、108 候車時間調整。</div></div></section>
 <section id="photos"><div class="sectiontop"><div><h2>04. 沿路會看到什麼？</h2><p>照片為景點參考，並非 10/31 即時狀況；點一下可以放大查看。</p></div></div><div class="photos"><article class="photocard"><img loading="lazy" class="zoom" data-title="絹絲瀑布（下段）" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Lower_Part_of_Juansi_Waterfall%2C_Yangmingshan.jpg/960px-Lower_Part_of_Juansi_Waterfall%2C_Yangmingshan.jpg" alt="絹絲瀑布下段瀑布水景" onerror="this.style.opacity='.2'"><div class="photobody"><b>01 · 絹絲瀑布</b><p>沿山豬湖圳進入森林，近距離看瀑布。</p><a href="https://commons.wikimedia.org/wiki/File:Lower_Part_of_Juansi_Waterfall,_Yangmingshan.jpg" target="_blank" rel="noopener">Taiwania Justo / CC BY-SA 4.0</a></div></article><article class="photocard"><img loading="lazy" class="zoom" data-title="絹絲瀑布上段" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Upper_part_of_Juansi_Waterfall%2C_Yangmingshan.jpg/960px-Upper_part_of_Juansi_Waterfall%2C_Yangmingshan.jpg" alt="絹絲瀑布上段的青綠色森林" onerror="this.style.opacity='.2'"><div class="photobody"><b>02 · 瀑布上游森林</b><p>濕潤多霧的林間路段，雨後防滑。</p><a href="https://commons.wikimedia.org/wiki/File:Upper_part_of_Juansi_Waterfall,_Yangmingshan.jpg" target="_blank" rel="noopener">Taiwania Justo / CC BY-SA 4.0</a></div></article><article class="photocard"><img loading="lazy" class="zoom" data-title="擎天崗草原" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Green_landscape_of_Qingtiangang.jpg/960px-Green_landscape_of_Qingtiangang.jpg" alt="擎天崗草原及遠方山巒" onerror="this.style.opacity='.2'"><div class="photobody"><b>03 · 擎天崗草原</b><p>森林轉為開闊草原，視野最寬廣。</p><a href="https://commons.wikimedia.org/wiki/File:Green_landscape_of_Qingtiangang.jpg" target="_blank" rel="noopener">shih-chen yang / CC BY-SA 2.0</a></div></article><article class="photocard"><img loading="lazy" class="zoom" data-title="擎天崗野化水牛（景觀與安全提醒）" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Yangmingshan_National_Park_Miranda_Wu_01.jpg/960px-Yangmingshan_National_Park_Miranda_Wu_01.jpg" alt="陽明山草原野化水牛" onerror="this.style.opacity='.2'"><div class="photobody"><b>04 · 草原與野化水牛</b><p>前往石梯嶺的開闊稜線可能遇到水牛。</p><a href="https://commons.wikimedia.org/wiki/File:Yangmingshan_National_Park_Miranda_Wu_01.jpg" target="_blank" rel="noopener">Whaleeditor / CC BY-SA 4.0</a></div></article></div></section>
 <section id="check"><div class="sectiontop"><div><h2>05. 回程、午餐與安全</h2><p>這段比走到石梯嶺更需要事先安排，尤其 18 人要一起回飯店。</p></div></div><div class="cards3"><div class="smallcard"><span class="tag">回程交通</span><h3>擎天崗搭 108 遊園公車</h3><p>官方假日班距約 20–30 分鐘，途經冷水坑、菁山遊憩區、中山樓、陽明山總站。<strong>108 區間車不經擎天崗。</strong>18 人可能要分批搭車。</p><a class="btn" href="https://ebus.gov.taipei/Route/RouteSchedule?routeid=0100010800" target="_blank" rel="noopener">查看公車即時資訊 ↗</a></div><div class="smallcard"><span class="tag yellow">午餐須預約</span><h3>完整版建議晚一點吃</h3><p>若完成石梯嶺折返，飯店附近午餐大約在 <span class="timehint"><span class="dark">14:30 後（08:30 集合）</span>／<span class="light">15:00 後（09:00 集合）</span></span> 才有機會開始；12:00 入座不適合完整版。</p><p>18 人可詢問菁山遊憩區的合菜餐廳，但中途下車用餐會增加一次 108 候車。</p><a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=%E8%8F%81%E8%89%B7%E6%99%AF%E8%A7%80%E9%A4%90%E5%BB%B3">菁艷景觀餐廳 ↗</a></div><div class="smallcard"><span class="tag yellow">決策門檻</span><h3>務必設定折返時間</h3><ul><li>擎天崗評估點：<span class="timehint"><span class="dark">11:15（08:30 集合）</span>／<span class="light">11:45（09:00 集合）</span></span>，未到就不加走石梯嶺。</li><li>石梯嶺折返點：<span class="timehint"><span class="dark">12:20</span>／<span class="light">12:50</span></span>，切勿續往頂山；兩版都可能晚於 15:00 回飯店。</li><li>若官方仍呼籲暫緩入山或發現落石倒木：不登山。</li></ul></div></div><div class="cards3" style="margin-top:13px"><div class="smallcard"><h3>出發前一天檢查</h3><ul><li>陽明山國家公園公告：是否解除颱風災後警示、步道是否開放。</li><li>預報：雨量、風速、雷雨、大霧。</li><li>飯店同意車輛停放及 08:30／09:00 集合。</li><li>108 班次與 18 人回程分組安排。</li></ul></div><div class="smallcard"><h3>18 人隊伍管理</h3><ul><li>至少領隊與壓隊各 1 人，避免單獨掉隊。</li><li>每人準備止滑鞋、雨具、保暖衣物及飲水。</li><li>水牛要保持距離，不餵食、不翻越封閉線。</li><li>山徑緊急狀況先確保安全，再撥 119 / 112。</li></ul></div><div class="smallcard"><h3>隔天 11/1 路跑 5K</h3><p>15:00 前回飯店仍是原定目標，但改為 08:30／09:00 集合後，完整版的時間軸已可能超出 15:00，應視情況提前折返或改保守版。長時間上下坡仍可能影響隔天雙腿。</p><a class="btn" href="https://www.sportsnet.org.tw/20261101_web/" target="_blank" rel="noopener">賽事公告 ↗</a></div></div></section>
 <div class="sectiontop"><div><h2>06. 資料來源</h2><p>更新與查詢日期：2026/10/27；Google Maps 分享連結更新於 2026/10/31。施工與開放以現場公告為準。</p></div></div><div class="resources"><a href="https://www.ymsnp.gov.tw/ch/specialreport/seeker/3650" target="_blank" rel="noopener">陽管處｜絹絲瀑布步道</a><a href="https://www.taiwan.nps.gov.tw/home/zh-tw/trails/21198.html" target="_blank" rel="noopener">官方｜陽金人車分道與中山樓接點</a><a href="https://www.nps.gov.tw/ch/titlelist/parknews/1521" target="_blank" rel="noopener">國家公園署｜擎天崗改道</a><a href="https://www.taiwan.nps.gov.tw/home/zh-tw/trails/21213.html" target="_blank" rel="noopener">官方｜頂山－石梯嶺</a><a href="https://www.ymsnp.gov.tw/ch/titlelist/news/4633" target="_blank" rel="noopener">陽管處｜颱風災後公告</a><a href="https://www.ymsnp.gov.tw/ch/titlelist/news" target="_blank" rel="noopener">最新公告總覽</a></div><footer class="bottom">此網頁為行程規劃輔助，不是正式登山導航／交通承諾。Google Maps、OpenStreetMap、圖片需連網，GPS 需使用 HTTPS 網址並允許定位。行程進度只儲存在各自裝置，沒有位置分享功能。<br>2026/10/31 08:30／09:00 · 陽明山國際大旅館集合 · 製作供同行者參考。</footer>
 </main>
-<div class="fab"><a class="gmaps-sticky" href="https://maps.app.goo.gl/Am32ySRc1a9VXScJ6?g_st=il" target="_blank" rel="noopener noreferrer">🗺 Google Maps 路線</a><a href="#timeline">行程表</a><a href="#maps">地圖・GPS</a></div><div class="toast" role="status" id="toast"></div><div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-label="查看景點照片"><div class="lbinner"><button id="closeLightbox" aria-label="關閉照片" type="button">×</button><img id="bigPhoto" alt="景點照片"><p id="photoCaption"></p></div></div>
+<div class="fab"><a class="gmaps-sticky" id="mobileStartNavigation" href="https://www.google.com/maps/dir/?api=1&destination=%E7%B5%B9%E7%B5%B2%E7%80%91%E5%B8%83%E6%AD%A5%E9%81%93%E5%8F%A3%2C+%E9%99%BD%E6%98%8E%E5%B1%B1%E5%9C%8B%E5%AE%B6%E5%85%AC%E5%9C%92%2C+%E8%87%BA%E5%8C%97%E5%B8%82&travelmode=walking&dir_action=navigate" target="_blank" rel="noopener noreferrer">🧭 開始導航</a><a href="https://maps.app.goo.gl/Am32ySRc1a9VXScJ6?g_st=il" target="_blank" rel="noopener noreferrer">🗺 完整路線</a><a href="#timeline">行程表</a><a href="#maps">地圖</a></div><div class="toast" role="status" id="toast"></div><div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-label="查看景點照片"><div class="lbinner"><button id="closeLightbox" aria-label="關閉照片" type="button">×</button><img id="bigPhoto" alt="景點照片"><p id="photoCaption"></p></div></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
 (function(){'use strict';
@@ -78,9 +150,33 @@ function dualNode(raw,className='dualtime'){
  return c;
 }
 function dualProse(raw){const c=document.createElement('span');c.className='dualprose';TIME_TRACKS.forEach(track=>{const line=document.createElement('span');line.className=track.cls;line.textContent=shiftClock(raw,track.minutes);c.appendChild(line)});return c}
+// Directions with dir_action=navigate and no origin ask Google Maps to navigate from the phone's live location.
+// Shared route link remains a separate overview because it cannot be forced to start navigation.
+const NAV_DESTINATIONS={
+ entry:'絹絲瀑布步道口, 陽明山國家公園, 臺北市',
+ fall:'絹絲瀑布, 陽明山國家公園, 臺北市',
+ q:'擎天崗遊客服務站, 陽明山國家公園, 臺北市',
+ s:'25.1605625,121.5875625',
+ hotel:'陽明山國際大旅館, 臺北市北投區湖山路一段7號'
+};
+function makeDirectNavigationUrl(destination){
+ const p=new URLSearchParams({api:'1',destination,travelmode:'walking',dir_action:'navigate'});
+ return 'https://www.google.com/maps/dir/?'+p.toString();
+}
+function updateDirectNavigation(){
+ const key=$('#navNextStop').value;
+ const url=makeDirectNavigationUrl(NAV_DESTINATIONS[key]);
+ ['#primaryStartNavigation','#linkStartNavigation','#mobileStartNavigation'].forEach(id=>{
+  const el=$(id);el.href=url;
+  el.setAttribute('aria-label','從目前位置嘗試開始步行導航到'+$('#navNextStop').selectedOptions[0].textContent.trim());
+ });
+}
+$('#navNextStop').addEventListener('change',updateDirectNavigation);
+updateDirectNavigation();
 let toastTimer=null; function toast(s){const el=$('#toast');el.textContent=s;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3600)}
 function safeGet(k){try{return JSON.parse(localStorage.getItem(k)||'[]')}catch(e){return []}}function safeSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function loadRoute(){const r=routes[currentMode];
+ $('#routeFallback').classList.toggle('short',currentMode==='short');
  $('#routeName').textContent=r.name;$('#routeTag').textContent=r.tag;$('#routeTag').className='tag'+(currentMode==='full'?' yellow':'');
  $('#routeAdvice').replaceChildren(dualProse(r.advice));
  $('#routeTiming').textContent=currentMode==='full'?'到石梯嶺 · 雙時間軸':'保守版 · 雙時間軸';
@@ -127,20 +223,54 @@ function drawRouteOverview(){
  const shown=currentMode==='short'?['hotel','z','entry','fall','q']:['hotel','z','entry','fall','q','gate','s'];
  const bounds=L.latLngBounds(shown.map(pointXY));map.fitBounds(bounds.pad(.12),{animate:false,maxZoom:15});
 }
+let tileLoads=0,tileErrors=0,panEnabled=false;
+function showRouteFallback(message){
+ const area=$('#routeMapArea');area.classList.remove('is-live','pan-enabled');
+ if(map){map.dragging.disable();map.touchZoom.disable()}
+ panEnabled=false;
+ $('#toggleInteractive').textContent='查看可縮放的互動底圖';
+ $('#toggleInteractive').setAttribute('aria-expanded','false');
+ $('#togglePan').hidden=true;
+ if(message){$('#mapNote').textContent=message;}
+}
 function activateMap(){
- if(!window.L){toast('步道底圖需要連網，地圖套件尚未載入');return false}
+ if(!window.L){toast('互動底圖未載入；可使用路線總覽及 Google Maps 按鈕');return false}
  if(!map){
-  map=L.map('leafletMap',{zoomControl:true}).setView([25.16,121.568],13);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19}).addTo(map);
+  const coarse=window.matchMedia('(pointer:coarse)').matches;
+  map=L.map('leafletMap',{zoomControl:true,dragging:!coarse,touchZoom:false,scrollWheelZoom:false,doubleClickZoom:!coarse,boxZoom:false,keyboard:false,tap:false}).setView([25.16,121.568],13);
+  const tiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19});
+  tiles.on('tileload',()=>{tileLoads++});
+  tiles.on('tileerror',()=>{tileErrors++;if(tileErrors>=5&&tileLoads===0&&$('#routeMapArea').classList.contains('is-live')){showRouteFallback('底圖連線失敗，已切回路線總覽；Google Maps 分享連結仍可正常使用。')}});
+  tiles.addTo(map);
   drawRouteOverview();if(currentGPS)paintGPS();
  }
- setTimeout(()=>{map.invalidateSize();if(!GPX)drawRouteOverview()},170);return true;
+ setTimeout(()=>{map.invalidateSize();if(!GPX)drawRouteOverview()},160);return true;
 }
-function showMap(){
- if(!window.L){toast('路線地圖套件無法載入，請確認網路連線');return}
+function showInteractiveMap(){
+ const area=$('#routeMapArea');area.classList.add('is-live');
+ $('#toggleInteractive').textContent='關閉互動底圖，返回順暢捲動';
+ $('#toggleInteractive').setAttribute('aria-expanded','true');
+ $('#togglePan').hidden=!window.matchMedia('(pointer:coarse)').matches;
+ if(!activateMap()){showRouteFallback();return false}
+ if(window.matchMedia('(pointer:coarse)').matches){map.dragging.disable();map.touchZoom.disable();area.classList.remove('pan-enabled');$('#togglePan').textContent='啟用拖動地圖';panEnabled=false;}
+ return true;
+}
+function showMap(force=false){
  googleTab=false;
- activateMap();
+ if(force)return showInteractiveMap();
+ if(window.matchMedia('(max-width:850px), (pointer:coarse)').matches){showRouteFallback();return true}
+ return showInteractiveMap();
 }
+$('#toggleInteractive').onclick=()=>{
+ if($('#routeMapArea').classList.contains('is-live'))showRouteFallback();else showInteractiveMap();
+};
+$('#togglePan').onclick=()=>{
+ if(!map)return;
+ panEnabled=!panEnabled;
+ $('#routeMapArea').classList.toggle('pan-enabled',panEnabled);
+ if(panEnabled){map.dragging.enable();map.touchZoom.enable();$('#togglePan').textContent='停止拖動，恢復頁面滑動';}
+ else{map.dragging.disable();map.touchZoom.disable();$('#togglePan').textContent='啟用拖動地圖';}
+};
 $('#tabGoogle').onclick=()=>window.open('https://maps.app.goo.gl/Am32ySRc1a9VXScJ6?g_st=il','_blank','noopener,noreferrer');
 $('#tabHike').onclick=showMap;
 showMap();
